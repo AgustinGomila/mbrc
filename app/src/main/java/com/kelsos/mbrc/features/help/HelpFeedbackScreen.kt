@@ -49,10 +49,13 @@ fun HelpFeedbackScreen(
   sendFeedback: SendFeedback
 ) = Surface {
   Column(modifier = Modifier.fillMaxSize()) {
-    RemoteTopAppBar(openDrawer = openDrawer) {
+    RemoteTopAppBar(
+      openDrawer = openDrawer,
+      title = stringResource(id = R.string.nav_help)
+    ) {
     }
     val tabs = listOf(R.string.tab_help, R.string.tab_feedback)
-    val pagerState = rememberPagerState(pageCount = tabs.size, initialOffscreenLimit = 2)
+    val pagerState = rememberPagerState()
     TabRow(
       selectedTabIndex = pagerState.currentPage,
       indicator = { tabPositions ->
@@ -75,7 +78,8 @@ fun HelpFeedbackScreen(
     }
     HorizontalPager(
       modifier = Modifier.weight(1f),
-      state = pagerState
+      state = pagerState,
+      count = tabs.size
     ) { page ->
 
       when (page) {
@@ -121,7 +125,8 @@ private fun FeedbackScreen(onSend: SendFeedback, coroutineScope: CoroutineScope)
       modifier = Modifier
         .padding(vertical = 16.dp)
         .weight(1f),
-      feedback = feedback, onValueChange = { feedback = it }
+      feedback = feedback,
+      onValueChange = { feedback = it }
     )
     IncludeLogs(includeLogs) { includeLogs = it }
     IncludeDeviceInfo(includeDevice) { includeDevice = it }
@@ -137,7 +142,7 @@ private fun FeedbackScreen(onSend: SendFeedback, coroutineScope: CoroutineScope)
 private fun FeedbackText(
   modifier: Modifier,
   feedback: String,
-  onValueChange: (String) -> Unit
+  onValueChange: (String) -> Unit,
 ) {
   Row(
     modifier = modifier
@@ -177,7 +182,7 @@ private fun SendFeedback(feedback: String, onClick: () -> Unit) {
   ) {
     Button(
       onClick = onClick,
-      modifier = Modifier.fillMaxWidth(0.8f),
+      modifier = Modifier.fillMaxWidth(fraction = 0.8f),
       enabled = feedback.isNotBlank()
     ) {
       Text(text = stringResource(id = R.string.feedback_button_text))
@@ -188,7 +193,7 @@ private fun SendFeedback(feedback: String, onClick: () -> Unit) {
 @Composable
 private fun IncludeDeviceInfo(
   includeDevice: Boolean,
-  onCheckedChange: (Boolean) -> Unit
+  onCheckedChange: (Boolean) -> Unit,
 ) {
   Row(
     modifier = Modifier

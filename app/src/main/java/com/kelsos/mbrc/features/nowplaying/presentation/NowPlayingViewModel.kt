@@ -15,36 +15,30 @@ import com.kelsos.mbrc.networking.client.playTrack
 import com.kelsos.mbrc.networking.client.removeTrack
 import com.kelsos.mbrc.networking.protocol.NowPlayingMoveRequest
 import com.kelsos.mbrc.ui.BaseViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class NowPlayingViewModel(
+interface INowPlayingActions {
+  fun reload()
+  fun search(query: String)
+  fun moveTrack(from: Int, to: Int)
+  fun removeTrack(position: Int)
+  fun play(position: Int)
+  fun move()
+}
+
+class NowPlayingActions(
+  private val scope: CoroutineScope,
+  private val moveManager: MoveManager,
   private val dispatchers: AppCoroutineDispatchers,
   private val repository: NowPlayingRepository,
-  private val moveManager: MoveManager,
   private val userActionUseCase: UserActionUseCase,
-  appState: AppState,
-) : BaseViewModel<NowPlayingUiMessages>() {
-
-  val list: Flow<PagingData<NowPlaying>> = repository.getAll().cachedIn(viewModelScope)
-  val playingTracks: Flow<PlayingTrack> = appState.playingTrack
-
-  init {
-    moveManager.onMoveCommit { originalPosition, finalPosition ->
-      viewModelScope.launch(dispatchers.network) {
-        userActionUseCase.moveTrack(
-          NowPlayingMoveRequest(
-            originalPosition,
-            finalPosition
-          )
-        )
-      }
-    }
-  }
-
-  fun reload() {
-    viewModelScope.launch(dispatchers.network) {
+  private val emit: suspend (uiMessage: NowPlayingUiMessages) -> Unit
+) : INowPlayingActions {
+  override fun reload() {
+    scope.launch(dispatchers.network) {
       val result = repository.getRemote()
         .fold(
           {
@@ -58,8 +52,8 @@ class NowPlayingViewModel(
     }
   }
 
-  fun search(query: String) {
-    viewModelScope.launch(dispatchers.database) {
+  override fun search(query: String) {
+    scope.launch(dispatchers.database) {
       val position = repository.findPosition(query)
       if (position > 0) {
         play(position)
@@ -67,24 +61,58 @@ class NowPlayingViewModel(
     }
   }
 
-  fun moveTrack(from: Int, to: Int) {
+  override fun moveTrack(from: Int, to: Int) {
     moveManager.move(from, to)
   }
 
-  fun play(position: Int) {
-    viewModelScope.launch(dispatchers.network) {
-      userActionUseCase.playTrack(position + 1)
+  override fun play(position: Int) {
+    scope.launch(dispatchers.network) {
+      userActionUseCase.playTrack(position)
     }
   }
 
-  fun removeTrack(position: Int) {
-    viewModelScope.launch(dispatchers.network) {
-      delay(400)
+  override fun removeTrack(position: Int) {
+    scope.launch(dispatchers.network) {
+      delay(timeMillis = 400)
       userActionUseCase.removeTrack(position)
     }
   }
 
-  fun move() {
+  override fun move() {
     moveManager.commit()
+  }
+}
+
+class NowPlayingViewModel(
+  private val dispatchers: AppCoroutineDispatchers,
+  repository: NowPlayingRepository,
+  moveManager: MoveManager,
+  private val userActionUseCase: UserActionUseCase,
+  appState: AppState
+) : BaseViewModel<NowPlayingUiMessages>() {
+
+  val list: Flow<PagingData<NowPlaying>> = repository.getAll().cachedIn(viewModelScope)
+  val playingTracks: Flow<PlayingTrack> = appState.playingTrack
+
+  val actions: NowPlayingActions = NowPlayingActions(
+    scope = viewModelScope,
+    moveManager = moveManager,
+    dispatchers = dispatchers,
+    repository = repository,
+    userActionUseCase = userActionUseCase,
+    emit = this::emit
+  )
+
+  init {
+    moveManager.onMoveCommit { originalPosition, finalPosition ->
+      viewModelScope.launch(dispatchers.network) {
+        userActionUseCase.moveTrack(
+          NowPlayingMoveRequest(
+            originalPosition,
+            finalPosition
+          )
+        )
+      }
+    }
   }
 }

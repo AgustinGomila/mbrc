@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
 
 class ApiBase(
   private val adapter: DeserializationAdapter,
-  private val apiRequestManager: RequestManager
+  private val apiRequestManager: RequestManager,
 ) {
 
   suspend fun <T> getItem(

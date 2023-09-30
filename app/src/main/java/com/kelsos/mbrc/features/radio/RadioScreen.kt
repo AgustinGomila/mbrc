@@ -35,42 +35,32 @@ import com.kelsos.mbrc.common.ui.SingleLineRow
 import com.kelsos.mbrc.common.ui.pagingDataFlow
 import com.kelsos.mbrc.features.library.PlayingTrack
 import com.kelsos.mbrc.features.minicontrol.MiniControl
+import com.kelsos.mbrc.features.minicontrol.MiniControlState
 import com.kelsos.mbrc.features.minicontrol.MiniControlViewModel
 import com.kelsos.mbrc.theme.RemoteTheme
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
 import org.koin.androidx.compose.getViewModel
 
 @Composable
 fun RadioScreen(
+  snackbarHostState: SnackbarHostState,
   openDrawer: () -> Unit,
   navigateToHome: () -> Unit,
-  snackbarHostState: SnackbarHostState
 ) {
   val vm = getViewModel<RadioViewModel>()
   val miniVm = getViewModel<MiniControlViewModel>()
-  val playingTrack by miniVm.playingTrack.collectAsState(initial = PlayingTrack())
-  val position by miniVm.playingPosition.collectAsState(initial = PlayingPosition())
-  val playingState by miniVm.playerStatus.map { it.state }.distinctUntilChanged()
-    .collectAsState(initial = PlayerState.Undefined)
+  val vmState by miniVm.state.collectAsState(initial = MiniControlState())
 
   RadioScreen(
+    snackbarHostState = snackbarHostState,
     openDrawer = openDrawer,
     stations = vm.radios.collectAsLazyPagingItems(),
     events = vm.emitter,
-    snackbarHostState = snackbarHostState,
-    play = { path ->
-      vm.play(path)
-    },
-    onRefresh = { vm.reload() }
+    actions = vm.actions
   ) {
     MiniControl(
-      playingTrack = playingTrack,
-      position = position,
-      state = playingState,
+      vmState = vmState,
       perform = { miniVm.perform(it) },
       navigateToHome = navigateToHome
     )
@@ -79,12 +69,11 @@ fun RadioScreen(
 
 @Composable
 private fun RadioScreen(
+  snackbarHostState: SnackbarHostState,
   openDrawer: () -> Unit,
   stations: LazyPagingItems<RadioStation>,
   events: Flow<RadioUiMessages>,
-  snackbarHostState: SnackbarHostState,
-  play: (path: String) -> Unit,
-  onRefresh: () -> Unit,
+  actions: RadioActions,
   content: @Composable () -> Unit,
 ) {
   val messages = mapOf(
@@ -102,7 +91,7 @@ private fun RadioScreen(
   }
 
   Column(modifier = Modifier.fillMaxSize()) {
-    RemoteTopAppBar(openDrawer = openDrawer) {}
+    RemoteTopAppBar(openDrawer = openDrawer, title = stringResource(id = R.string.nav_radio)) {}
 
     val isRefreshing = stations.loadState.refresh is LoadState.Loading
 
@@ -113,17 +102,19 @@ private fun RadioScreen(
         imageVector = Icons.Filled.Radio,
         contentDescription = stringResource(id = R.string.radio__empty_icon_content_description)
       ) {
-        TextButton(onClick = { onRefresh() }) {
+        TextButton(onClick = { actions.reload() }) {
           Text(text = stringResource(id = R.string.press_to_sync))
         }
       }
     } else {
       SwipeRefresh(
         state = rememberSwipeRefreshState(isRefreshing),
-        onRefresh = { onRefresh() },
+        onRefresh = { actions.reload() },
         modifier = Modifier.weight(1f)
       ) {
-        RadioStationContent(modifier = Modifier.weight(1f), stations = stations, play = play)
+        RadioStationContent(modifier = Modifier.weight(1f), stations = stations, play = {
+          actions.play(it)
+        })
       }
     }
 
@@ -137,7 +128,7 @@ private fun RadioScreen(
 fun RadioStationContent(
   modifier: Modifier = Modifier,
   stations: LazyPagingItems<RadioStation>,
-  play: (path: String) -> Unit
+  play: (path: String) -> Unit,
 ) {
   val listState = rememberLazyListState()
 
@@ -165,24 +156,28 @@ fun RadioStationRow(station: RadioStation?, play: (path: String) -> Unit) =
 fun PreviewRadioScreen() {
   RemoteTheme {
     RadioScreen(
+      snackbarHostState = SnackbarHostState(),
       openDrawer = { },
       stations = pagingDataFlow(
         RadioStation(name = "Radio 1", url = "", id = 1)
       ).collectAsLazyPagingItems(),
       events = emptyFlow(),
-      snackbarHostState = SnackbarHostState(),
-      play = {},
-      onRefresh = {},
+      actions = object : RadioActions {
+        override fun play(path: String) = Unit
+        override fun reload() = Unit
+      },
       {
         MiniControl(
-          playingTrack = PlayingTrack(
-            artist = "Caravan Palace",
-            album = "Panic",
-            title = "Rock It for Me",
-            year = "2008"
+          vmState = MiniControlState(
+            playingTrack = PlayingTrack(
+              artist = "Caravan Palace",
+              album = "Panic",
+              title = "Rock It for Me",
+              year = "2008"
+            ),
+            playingPosition = PlayingPosition(63000, 174000),
+            playingState = PlayerState.Playing
           ),
-          position = PlayingPosition(63000, 174000),
-          state = PlayerState.Playing,
           perform = {},
           navigateToHome = {}
         )

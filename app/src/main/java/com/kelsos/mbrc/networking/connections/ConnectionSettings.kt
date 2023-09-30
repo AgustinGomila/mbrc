@@ -8,7 +8,7 @@ data class ConnectionSettings(
   val port: Int,
   val name: String,
   val isDefault: Boolean,
-  val id: Long
+  val id: Long,
 ) {
   companion object {
     fun default(): ConnectionSettings = ConnectionSettings(

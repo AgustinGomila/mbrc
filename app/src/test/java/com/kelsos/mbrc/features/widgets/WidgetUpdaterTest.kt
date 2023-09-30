@@ -101,7 +101,15 @@ class WidgetUpdaterTest {
     )
 
     val broadcastReceiver = broadcastReceiver(WidgetUpdater.INFO) { bundle ->
-      values.add(checkNotNull(bundle.getParcelable(WidgetUpdater.TRACK_INFO)))
+      values.add(
+        checkNotNull(
+          if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+            @Suppress("DEPRECATION") bundle.getParcelable(WidgetUpdater.TRACK_INFO) as PlayingTrack?
+          } else {
+            bundle.getParcelable(WidgetUpdater.TRACK_INFO, PlayingTrack::class.java)
+          }
+        )
+      )
     }
 
     contextWrapper.registerReceiver(broadcastReceiver, intentFilter)

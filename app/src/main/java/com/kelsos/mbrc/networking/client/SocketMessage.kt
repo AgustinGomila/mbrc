@@ -10,7 +10,7 @@ data class SocketMessage(
   @Json(name = "context")
   val context: String,
   @Json(name = "data")
-  val data: Any = ""
+  val data: Any = "",
 ) {
 
   override fun toString(): String {

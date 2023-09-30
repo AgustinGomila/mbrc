@@ -5,7 +5,7 @@ data class SyncedData(
   val artists: Long,
   val albums: Long,
   val tracks: Long,
-  val playlists: Long
+  val playlists: Long,
 ) {
   companion object
 }

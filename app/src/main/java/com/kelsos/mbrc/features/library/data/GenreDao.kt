@@ -13,7 +13,7 @@ interface GenreDao {
   @Query("delete from genre")
   fun deleteAll()
 
-  @Insert(onConflict = OnConflictStrategy.ABORT)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
   fun insertAll(list: List<GenreEntity>)
 
   @Update
@@ -21,6 +21,9 @@ interface GenreDao {
 
   @Query("select * from genre order by genre")
   fun getAll(): PagingSource<Int, GenreEntity>
+
+  @Query("select * from genre order by genre")
+  fun all(): List<GenreEntity>
 
   @Query("select id, genre from genre order by genre")
   fun genres(): List<Genre>

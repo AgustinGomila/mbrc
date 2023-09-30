@@ -26,27 +26,30 @@ class CommandFactoryImpl : CommandFactory, KoinComponent {
 
   @Suppress("ComplexMethod")
   override fun create(protocol: Protocol): ProtocolAction = when (protocol) {
-    Protocol.NowPlayingTrack -> getKoin().get<UpdateNowPlayingTrack>()
     Protocol.NowPlayingCover -> getKoin().get<UpdateCover>()
-    Protocol.NowPlayingRating -> getKoin().get<UpdateRating>()
-    Protocol.PlayerStatus -> getKoin().get<UpdatePlayerStatus>()
-    Protocol.PlayerState -> getKoin().get<UpdatePlayState>()
-    Protocol.PlayerRepeat -> getKoin().get<UpdateRepeat>()
-    Protocol.PlayerVolume -> getKoin().get<UpdateVolume>()
-    Protocol.PlayerMute -> getKoin().get<UpdateMute>()
-    Protocol.PlayerShuffle -> getKoin().get<UpdateShuffle>()
-    Protocol.PlayerScrobble -> getKoin().get<UpdateLastFm>()
-    Protocol.NowPlayingLyrics -> getKoin().get<UpdateLyrics>()
     Protocol.NowPlayingLfmRating -> getKoin().get<UpdateLfmRating>()
-    Protocol.NowPlayingListRemove -> getKoin().get<UpdateNowPlayingTrackRemoval>()
     Protocol.NowPlayingListMove -> getKoin().get<UpdateNowPlayingTrackMoved>()
+    Protocol.NowPlayingListRemove -> getKoin().get<UpdateNowPlayingTrackRemoval>()
+    Protocol.NowPlayingLyrics -> getKoin().get<UpdateLyrics>()
     Protocol.NowPlayingPosition -> getKoin().get<UpdatePlaybackPositionCommand>()
-    Protocol.PluginVersion -> getKoin().get<UpdatePluginVersionCommand>()
+    Protocol.NowPlayingRating -> getKoin().get<UpdateRating>()
+    Protocol.NowPlayingTrack -> getKoin().get<UpdateNowPlayingTrack>()
     Protocol.Ping -> getKoin().get<ProtocolPingHandle>()
-    Protocol.Pong,
+    Protocol.PlayerMute -> getKoin().get<UpdateMute>()
+    Protocol.NowPlayingListPlay,
     Protocol.PlayerNext,
     Protocol.PlayerPrevious -> getKoin().get<SimpleLogCommand>()
+
+    Protocol.PlayerRepeat -> getKoin().get<UpdateRepeat>()
+    Protocol.PlayerScrobble -> getKoin().get<UpdateLastFm>()
+    Protocol.PlayerShuffle -> getKoin().get<UpdateShuffle>()
+    Protocol.PlayerState -> getKoin().get<UpdatePlayState>()
+    Protocol.PlayerStatus -> getKoin().get<UpdatePlayerStatus>()
+    Protocol.PlayerVolume -> getKoin().get<UpdateVolume>()
+    Protocol.PluginVersion -> getKoin().get<UpdatePluginVersionCommand>()
+    Protocol.Pong,
     Protocol.ProtocolTag -> getKoin().get<ProtocolVersionUpdate>()
+
     else -> error("Not supported message context $protocol")
   }
 }

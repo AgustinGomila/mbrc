@@ -8,13 +8,12 @@ import com.kelsos.mbrc.networking.connections.ConnectionStatus
 import com.kelsos.mbrc.platform.mediasession.SessionNotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.util.Timer
+import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 typealias StateHandler = (Boolean) -> Unit
@@ -24,7 +23,7 @@ class AppStateManager(
   private val connectionState: ConnectionState,
   private val notifications: SessionNotificationManager,
   private val trackCache: PlayingTrackCache,
-  private val dispatchers: AppCoroutineDispatchers
+  private val dispatchers: AppCoroutineDispatchers,
 ) {
   private var stateHandler: StateHandler? = null
   private var job = SupervisorJob()

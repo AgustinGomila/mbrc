@@ -15,7 +15,7 @@
     <p align="center">
         Application for controlling MusicBee through your Android Device 
         <br/>
-        <del><a href="https://play.google.com/store/apps/details?id=com.kelsos.mbrc">Play Store</a></del>(Unpublished as of January 2023)
+        <a href="https://play.google.com/store/apps/details?id=com.kelsos.mbrc">Play Store</a>
         <br/>
         <br/>
         <a href="https://mbrc.kelsos.net/help/">Help</a>
@@ -27,9 +27,6 @@
         <a href="https://github.com/musicbeeremote/android-app/issues">Request Feature</a>
     </p>
 </p>
-
-## Application development status
-**As of January 2023 the application is now unpublished from Play Store and considered unmaintained.** For the majority of 2022 I didn't have the energy or time to continue with the development and support of the application. I might still answer support e-mails and you can still use the available builds but the application will be as it is.
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
@@ -133,7 +130,7 @@ The source code of the application is licensed under the [GPLv3](https://www.gnu
 
 MusicBee Remote - [@MusicBeeRemote](https://twitter.com/musicbeeremote)
 
-Project Link: [https://github.com/musicbeeremote/mbrc-plugin](https://github.com/musicbeeremote/mbrc-plugin)
+Project Link: [https://github.com/musicbeeremote/android-app](https://github.com/musicbeeremote/android-app)
 
 ## Acknowledgements
 

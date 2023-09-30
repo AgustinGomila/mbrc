@@ -10,7 +10,7 @@ data class SettingsState(
   val libraryAction: Queue,
   val onlyAlbumArtists: Boolean,
   val checkPluginUpdate: Boolean,
-  val debugLog: Boolean
+  val debugLog: Boolean,
 ) {
   companion object {
     fun default() = SettingsState(
